@@ -20,7 +20,7 @@ AKARIでハンド追跡をするアプリです
 `python3 hand_tracking.py -g <任意のジェスチャー名>`  
 指定できるジェスチャー名は以下  
 ・OK  
-・PEACE 
+・PEACE  
 ・FIST  
 ・ONE  
 ・TWO  
