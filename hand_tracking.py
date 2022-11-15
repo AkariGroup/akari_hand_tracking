@@ -35,7 +35,7 @@ def get_args() -> Any:
                         help="Solo mode: detect one hand max. If not used, detect 2 hands max (Duo mode)")
     parser_tracker.add_argument('-xyz', "--xyz", action="store_true",
                         help="Enable spatial location measure of palm centers")
-    parser_tracker.add_argument('-g', '--gesture', default="OK",
+    parser_tracker.add_argument('-g', '--gesture',
                         choices=["ONE", "TWO", "THREE", "FOUR", "FIVE", "OK", "PEACE", "FIST"], help="Specify gestures to track")
     parser_tracker.add_argument('-c', '--crop', action="store_true",
                         help="Center crop frames to a square shape")
@@ -162,7 +162,10 @@ class DirectionUpdater:
             detections = q_detection.get()
             print(detections)
             dect_x, dect_y, dect_w, dect_h = detections[0]
-            gesture_result = detections[1]
+            if not target_gesture:
+                gesture_result = None
+            else:
+                gesture_result = detections[1]
 
             if (gesture_result == target_gesture):
                 self._bbox_x = dect_x
