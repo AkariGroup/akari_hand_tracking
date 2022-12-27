@@ -7,7 +7,7 @@ import time
 from queue import Queue
 from time import sleep
 from typing import Any
-from akari_controller.akari_controller import AkariController
+from akari_client import AkariClient
 
 
 VIDEO_WIDTH, VIDEO_HEIGHT = 1152, 648
@@ -68,31 +68,26 @@ class FaceTracker:
         global pan_target_angle
         global tilt_target_angle
 
-        # AkariControllerのインスタンスを作成する
-        self.akari = AkariController()
+        # AkariClientのインスタンスを作成する
+        self.akari = AkariClient()
+        # 関節制御用のインスタンスを取得する
+        self.joints = self.akari.joints
 
         self._default_x = 0
         self._default_y = 0
 
         # サーボトルクON
-        self.akari.enable_all_servo()
+        self.joints.enable_all_servo()
         # モータ速度設定
-        self.akari.set_joint_velocities(pan=10, tilt=10)
+        self.joints.set_joint_velocities(pan=10, tilt=10)
         # モータ加速度設定
-        self.akari.set_joint_accelerations(pan=30, tilt=30)
+        self.joints.set_joint_accelerations(pan=30, tilt=30)
 
         time.sleep(0.5)
 
         # Initialize motor position
-        self.akari.move_joint_positions(pan=0, tilt=0)
-        while True:
-            if (
-                abs(self.akari.get_joint_positions()["pan"] - self._default_x) <= 0.087
-                and abs(self.akari.get_joint_positions()["tilt"] - self._default_y)
-                <= 0.087
-            ):
-                break
-        self.currentMotorAngle = self.akari.get_joint_positions()
+        self.joints.move_joint_positions(sync=True, pan=0, tilt=0)
+        self.currentMotorAngle = self.joints.get_joint_positions()
 
         # Dynamixel Input Value
         pan_target_angle = self.currentMotorAngle["pan"]
@@ -102,7 +97,7 @@ class FaceTracker:
         global pan_target_angle
         global tilt_target_angle
         while True:
-            self.akari.move_joint_positions(
+            self.joints.move_joint_positions(
                 pan=pan_target_angle, tilt=tilt_target_angle
             )
             sleep(0.01)
