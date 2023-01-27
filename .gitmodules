@@ -1,0 +1,3 @@
+[submodule "depthai_hand_tracker"]
+	path = depthai_hand_tracker
+	url = https://github.com/geaxgx/depthai_hand_tracker.git
