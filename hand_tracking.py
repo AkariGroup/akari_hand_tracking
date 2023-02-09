@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from HandTrackerRenderer import HandTrackerRenderer
+from depthai_hand_tracker.HandTrackerRenderer import HandTrackerRenderer
 import argparse
 import threading
 import time
@@ -8,7 +8,9 @@ from queue import Queue
 from time import sleep
 from typing import Any
 from akari_client import AkariClient
+import sys
 
+sys.path.append("depthai_hand_tracker")
 
 VIDEO_WIDTH, VIDEO_HEIGHT = 1152, 648
 
@@ -211,10 +213,10 @@ def HandRecognition(q_detection: Any, args: Any) -> None:
     tracker_args = {a: dargs[a] for a in ['pd_model', 'lm_model', 'internal_fps', 'internal_frame_height'] if dargs[a] is not None}
 
     if args.edge:
-        from HandTrackerEdge import HandTracker
+        from depthai_hand_tracker.HandTrackerEdge import HandTracker
         tracker_args['use_same_image'] = not args.dont_force_same_image
     else:
-        from HandTracker import HandTracker
+        from depthai_hand_tracker.HandTracker import HandTracker
 
     tracker = HandTracker(
         input_src=args.input,
