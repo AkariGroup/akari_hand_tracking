@@ -2,7 +2,6 @@
 
 from depthai_hand_tracker.HandTrackerRenderer import HandTrackerRenderer
 import argparse
-import blobconverter
 import threading
 import time
 from queue import Queue
