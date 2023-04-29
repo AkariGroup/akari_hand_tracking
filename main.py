@@ -2,6 +2,7 @@
 
 from depthai_hand_tracker.HandTrackerRenderer import HandTrackerRenderer
 import argparse
+import blobconverter
 import threading
 import time
 from queue import Queue
@@ -26,13 +27,12 @@ def get_args() -> Any:
         '--gesture',
         choices=["ONE", "TWO", "THREE", "FOUR", "FIVE", "OK", "PEACE", "FIST"],
         help="Specify gestures to track"
-        )
+    )
     return parser.parse_args()
 
 
-# 顔追従するクラス
-class FaceTracker:
-    """face tracking class"""
+# 手追従するクラス
+class HandTracker:
 
     def __init__(self) -> None:
         global pan_target_angle
@@ -42,9 +42,6 @@ class FaceTracker:
         self.akari = AkariClient()
         # 関節制御用のインスタンスを取得する
         self.joints = self.akari.joints
-
-        self._default_x = 0
-        self._default_y = 0
 
         # サーボトルクON
         self.joints.enable_all_servo()
@@ -75,7 +72,6 @@ class FaceTracker:
 
 # モーター可動角を更新するクラス
 class DirectionUpdater:
-    """Update direction from face info"""
 
     _H_PIX_WIDTH = VIDEO_WIDTH
     _H_PIX_HEIGHT = VIDEO_HEIGHT
@@ -102,8 +98,6 @@ class DirectionUpdater:
     _TILT_POS_MIN = -0.523
 
     def __init__(self) -> None:
-        global prev_time
-        global cur_time
         self._bbox_x = 0
         self._bbox_y = 0
         self._bbox_width = 0
@@ -189,21 +183,19 @@ def HandRecognition(q_detection: Any) -> None:
     gesture_result = ""
 
     while True:
-        # Run hand tracker on next frame
-        # 'bag' contains some information related to the frame
-        # and not related to a particular hand like body keypoints in Body Pre Focusing mode
-        # Currently 'bag' contains meaningful information only when Body Pre Focusing is used
         frame, hands, bag = tracker.next_frame()
         if frame is None:
             break
 
         for hand in hands:
             palm_detection = (
-                int(hand.landmarks[0][0] + (hand.landmarks[9][0] - hand.landmarks[0][0]) / 2),
-                int(hand.landmarks[0][1] + (hand.landmarks[9][1] - hand.landmarks[0][1]) / 2),
+                int(hand.landmarks[0][0] + (hand.landmarks[9]
+                    [0] - hand.landmarks[0][0]) / 2),
+                int(hand.landmarks[0][1] + (hand.landmarks[9]
+                    [1] - hand.landmarks[0][1]) / 2),
                 abs(hand.landmarks[9][0] - hand.landmarks[0][0]),
                 abs(hand.landmarks[9][0] - hand.landmarks[0][0])
-                )
+            )
             gesture_result = hand.gesture
             q_detection.put((palm_detection, gesture_result))
 
@@ -221,13 +213,14 @@ def main() -> None:
     target_gesture = args.gesture
 
     q_detection: Any = Queue()
-    face_tracker = FaceTracker()
+    hand_tracker = HandTracker()
     direction_updater = DirectionUpdater()
 
     # Threadの設定
     t1 = threading.Thread(target=HandRecognition, args=(q_detection,))
-    t2 = threading.Thread(target=direction_updater._bbox_info_cb, daemon=True, args=(q_detection, target_gesture))
-    t3 = threading.Thread(target=face_tracker._tracker, daemon=True)
+    t2 = threading.Thread(target=direction_updater._bbox_info_cb,
+                          daemon=True, args=(q_detection, target_gesture))
+    t3 = threading.Thread(target=hand_tracker._tracker, daemon=True)
 
     # Threadの動作
     t1.start()
