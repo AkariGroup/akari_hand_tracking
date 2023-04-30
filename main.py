@@ -95,6 +95,8 @@ class DirectionUpdater:
     _PAN_POS_MIN = -1.047
     _TILT_POS_MAX = 0.523
     _TILT_POS_MIN = -0.523
+    _pan_offset = 0
+    _tilt_offset = 0.02
 
     def __init__(self) -> None:
         self._bbox_x = 0
@@ -154,13 +156,13 @@ class DirectionUpdater:
         )  # -1 ~ 1
 
         if abs(pan_error) > self._PAN_THRESHOLD and not (bbox_x == self._old_bbox_x):
-            pan_target_angle += self._pan_p_gain * pan_error
+            pan_target_angle += self._pan_p_gain * pan_error + self._pan_offset
         if pan_target_angle < self._PAN_POS_MIN:
             pan_target_angle = self._PAN_POS_MIN
         elif pan_target_angle > self._PAN_POS_MAX:
             pan_target_angle = self._PAN_POS_MAX
         if abs(tilt_error) > self._TILT_THRESHOLD and not (bbox_y == self._old_bbox_y):
-            tilt_target_angle += self._tilt_p_gain * tilt_error
+            tilt_target_angle += self._tilt_p_gain * tilt_error + self._tilt_offset
         if tilt_target_angle < self._TILT_POS_MIN:
             tilt_target_angle = self._TILT_POS_MIN
         elif tilt_target_angle > self._TILT_POS_MAX:
