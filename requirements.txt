@@ -1,2 +1,3 @@
 akari-client[depthai]
 akari-proto
+depthai==2.15.0
