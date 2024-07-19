@@ -174,7 +174,7 @@ class DirectionUpdater:
 
 # 手のひら検出をする関数
 def HandRecognition(q_detection: Any) -> None:
-    from depthai_hand_tracker.HandTrackerEdge import HandTracker
+    from depthai_hand_tracker.HandTracker import HandTracker
 
     tracker = HandTracker(use_gesture=True)
 
